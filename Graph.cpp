@@ -14,3 +14,8 @@ Graph::~Graph()
 
 bool Graph::getType(){return m_Type;}	
 int Graph::getSize(){return m_Size;}
+void Graph::setSize(int size)
+{
+	m_Size = size;
+	return;
+}

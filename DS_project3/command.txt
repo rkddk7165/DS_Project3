@@ -1,0 +1,2 @@
+LOAD graph_L
+PRINT
