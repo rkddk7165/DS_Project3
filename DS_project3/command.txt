@@ -1,2 +1,5 @@
-LOAD graph_L
+LOAD graph_M
 PRINT
+BFS Y 1
+DFS Y 1
+KRUSKAL

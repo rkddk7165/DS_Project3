@@ -13,14 +13,36 @@ MatrixGraph::~MatrixGraph()
 
 }
 
-void MatrixGraph::getAdjacentEdges(int vertex, map<int, int>* m)
-{	
+void MatrixGraph::getAdjacentEdges(int vertex, std::map<int, int>* m) {
+    m->clear();  // 기존의 데이터를 초기화
+
+    // vertex에 연결된 간선들을 m에 추가
+    for (int i = 1; i < m_Size+1; ++i) {
+        if (m_Mat[vertex][i] != 0) {
+            (*m)[i] = m_Mat[vertex][i];
+        }
+    }
+
+    // 다른 정점에서 vertex로 들어오는 간선들을 m에 추가
+    for (int i = 1; i < m_Size+1; ++i) {
+        if (m_Mat[i][vertex] != 0) {
+            (*m)[i] = m_Mat[i][vertex];
+        }
+    }
 
 }
 
-void MatrixGraph::getAdjacentEdgesDirect(int vertex, map<int, int>* m)
-{
-	
+void MatrixGraph::getAdjacentEdgesDirect(int vertex, std::map<int, int>* m) {
+    m->clear();  // 기존의 데이터를 초기화
+
+    // vertex에서 나가는 간선들을 m에 추가
+    for (int i = 1; i < m_Size+1; ++i) {
+        if (m_Mat[vertex][i] != 0) {
+            (*m)[i] = m_Mat[vertex][i];
+        }
+    }
+
+    
 }
 
 void MatrixGraph::insertEdge(int from, int to, int weight)	

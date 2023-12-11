@@ -13,14 +13,31 @@ ListGraph::~ListGraph()
 	
 }
 
-void ListGraph::getAdjacentEdges(int vertex, map<int, int>* m)	 //Definition of getAdjacentEdges(No Direction == Undirected)
-{
-    return;
+void ListGraph::getAdjacentEdges(int vertex, map<int, int>* m) {
+    if (m_List == nullptr || vertex < 1 || vertex > m_Size) {
+        cout << "Invalid vertex or graph not initialized." << endl;
+        return;
+    }
+
+    for (auto it = m_List[vertex].begin(); it != m_List[vertex].end(); ++it) {
+        m->insert({ it->first, it->second });
+    }
 }
 
-void ListGraph::getAdjacentEdgesDirect(int vertex, map<int, int>* m)	//Definition of getAdjacentEdges(Directed graph)
-{
-    return;
+
+void ListGraph::getAdjacentEdgesDirect(int vertex, map<int, int>* m) {
+    if (m_List == nullptr || vertex < 1 || vertex > m_Size) {
+        cout << "Invalid vertex or graph not initialized." << endl;
+        return;
+    }
+
+    for (int i = 1; i <= m_Size; ++i) {
+        for (auto it = m_List[i].begin(); it != m_List[i].end(); ++it) {
+            if (it->first == vertex) {
+                m->insert({ i, it->second });
+            }
+        }
+    }
 }
 
 void ListGraph::insertEdge(int from, int to, int weight)
@@ -86,7 +103,7 @@ void ListGraph::LOAD(const char* filename)
      m_List = new map<int, int>[size + 1];
 
      int from, to, weight, vertex;
-
+     /*
     while (fin >> from)
     {
         // 형식 1: 시작 정점만 있는 경우
@@ -116,16 +133,16 @@ void ListGraph::LOAD(const char* filename)
             }
         }
     }
+    */
+    while (fin >> from)
+    {
+        if (from == 0) // 파일의 끝
+            break;
 
-    //while (fin >> from)
-    //{
-    //    if (from == 0) // 파일의 끝
-    //        break;
+        fin >> to >> weight;
 
-    //    fin >> to >> weight;
-
-    //    insertEdge(from, to, weight);
-    //}
+        insertEdge(from, to, weight);
+    }
 
     fin.close();
     return;

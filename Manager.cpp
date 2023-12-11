@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
 
 Manager::Manager()	
 {
@@ -30,17 +31,18 @@ void Manager::run(const char* command_txt){
 	}
 
 
-    //명령어 읽기
-    while (!fin.eof())
-    {
-        string cmd;
-        if (!getline(fin, cmd))
-        {
-            break;
-        }
+    // 명령어 읽기
+    string cmd;
+    while (getline(fin, cmd)) {
+        istringstream iss(cmd);
+        string command;
+        iss >> command;
 
-        else if (cmd.substr(0,4) == "LOAD"){
-            if (cmd.substr(5) == "graph_L") {
+        if (command == "LOAD") {
+            string graphType;
+            iss >> graphType;
+
+            if (graphType == "graph_L") {
                 if (LOAD("graph_L.txt")) {
                     fout << "========== LOAD ==========" << endl << "SUCCESS" << endl << "==========================" << endl;
                 }
@@ -48,7 +50,7 @@ void Manager::run(const char* command_txt){
                     printErrorCode(100);
                 }
             }
-            else if (cmd.substr(5) == "graph_M") {
+            else if (graphType == "graph_M") {
                 if (LOAD("graph_M.txt")) {
                     fout << "========== LOAD ==========" << endl << "SUCCESS" << endl << "==========================" << endl;
                 }
@@ -56,16 +58,50 @@ void Manager::run(const char* command_txt){
                     printErrorCode(100);
                 }
             }
-            else printErrorCode(100);
+            else {
+                printErrorCode(100);
+            }
         }
-
-        else if (cmd == "PRINT") {
+        else if (command == "PRINT") {
             PRINT();
         }
+        else if (command == "BFS") {
+            char option;
+            int vertex;
+            iss >> option >> vertex;
+
+            if (option == 'Y' || option == 'N') {
+                if (!mBFS(option, vertex)) {
+                    printErrorCode(300);
+                }
+            }
+            else {
+                printErrorCode(300);
+            }
+        }
+
+        else if (command == "DFS") {
+            char option;
+            int vertex;
+            iss >> option >> vertex;
+
+            if (option == 'Y' || option == 'N') {
+                if (!mDFS(option, vertex)) {
+                    printErrorCode(400);
+                }
+            }
+            else {
+                printErrorCode(400);
+            }
+        }
+
+        else if (command == "KRUSKAL") {
+              mKRUSKAL();
+        }
     }
-	
-	fin.close();
-	return;
+
+    fin.close();
+    return;
 }
 
 bool Manager::LOAD(const char* filename)
@@ -152,13 +188,91 @@ bool Manager::PRINT()
     return true;
 }
 
-bool Manager::mBFS(char option, int vertex)	
+bool Manager::mBFS(char option, int vertex)
 {
+    // 그래프가 로드되어 있지 않은 경우
+    if (!load) {
+        printErrorCode(300);
+        return false;
+    }
+
+    // 방향성 설정
+    bool isDirected = (option == 'Y');
+
+    // 그래프의 타입에 따라서 적절한 함수 호출
+    if (graph->getType() == false) {  // ListGraph
+        // ListGraph의 BFS 함수 호출
+        ListGraph* listGraph = dynamic_cast<ListGraph*>(graph);
+        if (listGraph) {
+            // ListGraph의 BFS 함수 호출
+            BFS(listGraph, option, vertex);
+        }
+        else printErrorCode(300);
+    }
+    else if (graph->getType() == true) { //MatrixGraph
+        MatrixGraph* matrixGraph = dynamic_cast<MatrixGraph*>(graph);
+            if (matrixGraph) {
+                // MatrixGraph의 BFS 함수 호출
+                BFS(matrixGraph, option, vertex);
+            }
+            else {
+                printErrorCode(300);
+            }
+
+    }
+    else {  // MatrixGraph
+        // MatrixGraph의 BFS 함수 호출
+        if (!BFS(graph, isDirected, vertex)) {
+            printErrorCode(101);  // BFS 함수 호출 오류
+            return false;
+        }
+    }
+
     return true;
 }
 
+
+
 bool Manager::mDFS(char option, int vertex)	
 {
+    // 그래프가 로드되어 있지 않은 경우
+    if (!load) {
+        printErrorCode(400);
+        return false;
+    }
+
+    // 방향성 설정
+    bool isDirected = (option == 'Y');
+
+    // 그래프의 타입에 따라서 적절한 함수 호출
+    if (graph->getType() == false) {  // ListGraph
+        // ListGraph의 BFS 함수 호출
+        ListGraph* listGraph = dynamic_cast<ListGraph*>(graph);
+        if (listGraph) {
+            // ListGraph의 BFS 함수 호출
+            DFS(listGraph, option, vertex);
+        }
+        else printErrorCode(400);
+    }
+    else if (graph->getType() == true) { //MatrixGraph
+        MatrixGraph* matrixGraph = dynamic_cast<MatrixGraph*>(graph);
+        if (matrixGraph) {
+            // MatrixGraph의 BFS 함수 호출
+            DFS(matrixGraph, option, vertex);
+        }
+        else {
+            printErrorCode(400);
+        }
+
+    }
+    else {  // MatrixGraph
+        // MatrixGraph의 BFS 함수 호출
+        if (!BFS(graph, isDirected, vertex)) {
+            printErrorCode(400);  // BFS 함수 호출 오류
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -169,6 +283,28 @@ bool Manager::mDIJKSTRA(char option, int vertex)
 
 bool Manager::mKRUSKAL()
 {
+    // 그래프가 로드되어 있지 않은 경우
+    if (!load) {
+        printErrorCode(300);
+        return false;
+    }
+
+    // 그래프의 타입에 따라서 적절한 함수 호출
+    if (graph->getType() == 0) {  // ListGraph
+        ListGraph* listGraph = dynamic_cast<ListGraph*>(graph);
+        if (!Kruskal(listGraph)) {
+            printErrorCode(500);  // KRUSKAL 함수 호출 오류
+            return false;
+        }
+    }
+    else {  // MatrixGraph
+        MatrixGraph* matrixGraph = dynamic_cast<MatrixGraph*>(graph);
+        if (!Kruskal(matrixGraph)) {
+            printErrorCode(500);  // KRUSKAL 함수 호출 오류
+            return false;
+        }
+    }
+
     return true;
 }
 
